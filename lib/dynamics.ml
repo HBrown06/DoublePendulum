@@ -26,9 +26,9 @@ let accelerations (params : Parameters.t)(state : State.t) =
   let det = m11 *. m22 -. m12 *. m21 in
 
   (*
-    Formula to solve for the two
+    Formula to solve for the two accelerations; derived from the inverse of a 2 x 2 matrix.
   *)
-  let alpha1 = (m22 *. b2 -. m12 *. b2) /. det in
-  let alpha2 = (m11 *. b1 -. m21 *. b2) /. det in
+  let alpha1 = (m22 *. b1 -. m12 *. b2) /. det in
+  let alpha2 = (m11 *. b2 -. m21 *. b1) /. det in
 
   (alpha1, alpha2)
