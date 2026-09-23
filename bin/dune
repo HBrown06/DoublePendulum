@@ -1,0 +1,4 @@
+(executable
+ (public_name Double-Pendulum)
+ (name main)
+ (libraries Double_Pendulum))
