@@ -20,8 +20,8 @@ let add (d1 : t)(d2 : t) =
         alpha1 = d1.alpha1 +. d2.alpha1;
         alpha2 = d1.alpha2 +. d2.alpha2;
     }
-    
-let scale (d : t)(c : float) =
+
+let scale (c : float)(d : t) =
     {
         omega1 = d.omega1 *. c;
         omega2 = d.omega2 *. c;
