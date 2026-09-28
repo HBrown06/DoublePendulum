@@ -13,3 +13,6 @@ type t = {
   omega1 : float;
   omega2 : float;
 }
+
+(* let add_scaled_derivative (deriv : Derivative.t) =
+    *)
