@@ -9,9 +9,9 @@
 *)
 
 type t = {
-  m1 : float;
-  m2 : float;
-  l1 : float;
-  l2 : float;
-  g : float;
+    m1 : float;
+    m2 : float;
+    l1 : float;
+    l2 : float;
+    g : float;
 }
