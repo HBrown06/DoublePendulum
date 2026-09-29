@@ -21,7 +21,7 @@ let accelerations (params : Parameters.t)(state : State.t) =
       Encodes the data in the B matrix from the Euler-Lagrange equation. 
     *)
     let b1 = -. params.g *. sin(state.theta1) *. (params.m1 +. params.m2) -. params.m2 *. params.l2 *. state.omega2 *. state.omega2 *. sin(delta) in
-    let b2 = -. params.g *. sin(state.theta2) -. params.l1 *. state.omega1 *. state.omega1 *. sin(delta) in
+    let b2 = -. params.g *. sin(state.theta2) +. params.l1 *. state.omega1 *. state.omega1 *. sin(delta) in
 
     let det = m11 *. m22 -. m12 *. m21 in
 
@@ -32,3 +32,12 @@ let accelerations (params : Parameters.t)(state : State.t) =
     let alpha2 = (m11 *. b2 -. m21 *. b1) /. det in
 
     (alpha1, alpha2)
+
+let derivative (params : Parameters.t)(state : State.t) : Derivative.t = 
+    let alpha1, alpha2 = accelerations(params)(state) in
+    {
+        Derivative.omega1 = state.omega1;
+        Derivative.omega2 = state.omega2;
+        Derivative.alpha1 = alpha1;
+        Derivative.alpha2 = alpha2;
+    }
