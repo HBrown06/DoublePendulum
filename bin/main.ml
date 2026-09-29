@@ -9,26 +9,26 @@ let params : Parameters.t = {
 }
 
 let initial_states : State.t list = [
-  {
-    theta1 = Float.pi /. 2.0;
-    theta2 = Float.pi /. 3.0;
-    omega1 = 0.0;
-    omega2 = 0.0;
-  };
+    {
+        theta1 = Float.pi /. 2.0;
+        theta2 = Float.pi /. 3.0;
+        omega1 = 0.0;
+        omega2 = 0.0;
+    };
 
-  {
-    theta1 = Float.pi /. 2.0 +. 0.01;
-    theta2 = Float.pi /. 3.0;
-    omega1 = 0.0;
-    omega2 = 0.0;
-  };
+    {
+        theta1 = Float.pi /. 2.0 +. 0.01;
+        theta2 = Float.pi /. 3.0;
+        omega1 = 0.0;
+        omega2 = 0.0;
+    };
 
-  {
-    theta1 = Float.pi /. 2.0 +. 0.02;
-    theta2 = Float.pi /. 3.0;
-    omega1 = 0.0;
-    omega2 = 0.0;
-  };
+    {
+        theta1 = Float.pi /. 2.0 +. 0.02;
+        theta2 = Float.pi /. 3.0;
+        omega1 = 0.0;
+        omega2 = 0.0;
+    };
 ]
 
 let h = 0.001

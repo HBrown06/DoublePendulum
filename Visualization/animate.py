@@ -11,18 +11,19 @@ runs = [
 
 L1 = 1.0
 L2 = 1.0
+plt.style.use('dark_background')
 fig, ax = plt.subplots()
 
 ax.set_aspect("equal")
 ax.set_xlim(-L1 - L2, L1 + L2)
 ax.set_ylim(-L1 - L2, L1 + L2)
 ax.invert_yaxis()
-
+ax.axis('off')
 
 pendulums = []
 
 for run in runs:
-    rod, = ax.plot([], [], "o-", linewidth = 2)
+    rod, = ax.plot([], [], "-", linewidth = 2)
     pendulums.append(rod)
 
 def update(frame):
