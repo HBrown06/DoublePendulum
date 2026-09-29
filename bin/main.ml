@@ -8,22 +8,32 @@ let params : Parameters.t = {
     g = 9.81;
 }
 
-let initial_state : State.t = {
-    theta1 = 2.0 *.Float.pi /. 3.0;
-    theta2 = 0.0;
+let initial_states : State.t list = [
+  {
+    theta1 = Float.pi /. 2.0;
+    theta2 = Float.pi /. 3.0;
     omega1 = 0.0;
     omega2 = 0.0;
-}
+  };
+
+  {
+    theta1 = Float.pi /. 2.0 +. 0.01;
+    theta2 = Float.pi /. 3.0;
+    omega1 = 0.0;
+    omega2 = 0.0;
+  };
+
+  {
+    theta1 = Float.pi /. 2.0 +. 0.02;
+    theta2 = Float.pi /. 3.0;
+    omega1 = 0.0;
+    omega2 = 0.0;
+  };
+]
 
 let h = 0.001
 
-let next_state =
-  Integrator.runge_kutta_4
-    initial_state
-    (Dynamics.derivative params)
-    h
-
-let rec simulate (state : State.t)(time : float)(final_time : float)(time_step : float)(out : out_channel)  = 
+let rec simulate (run_id : int)(state : State.t)(time : float)(final_time : float)(time_step : float)(out : out_channel)  = 
     if time >= final_time then
         ()
     else begin
@@ -35,7 +45,8 @@ let rec simulate (state : State.t)(time : float)(final_time : float)(time_step :
             -. (params.m1 +. params.m2) *. params.g *. params.l1 *. cos(state.theta1)
             -. params.m2 *. params.g *. params.l2 *. cos(state.theta2) in
         Printf.fprintf out
-        "%f, %f, %f, %f, %f, %f\n"
+        "%d, %f, %f, %f, %f, %f, %f\n"
+        run_id
         time
         state.theta1
         state.theta2
@@ -44,10 +55,13 @@ let rec simulate (state : State.t)(time : float)(final_time : float)(time_step :
         energy;
     
     let next_state = Integrator.runge_kutta_4 (state)(Dynamics.derivative params)(h) in
-    simulate(next_state)(time +. h)(final_time)(h)(out)
+    simulate run_id next_state (time +. h) final_time h out
 end
 
 let () = 
     let out = open_out "data/simulation.csv" in
-    simulate(initial_state)(0.0)(60.0)(h)(out);
+     List.iteri
+    (fun i state ->
+        simulate i state 0.0 20.0 h out)
+    initial_states;
     close_out out
