@@ -1,30 +1,24 @@
 (**
   Description of the rate of change of the state variables.
 
-  @param omega1 the angular velocity of the first pendulum;
-  @param omega2 the angular velocity of the second pendulum;
-  @param alpha1 the angular acceleration of the first pendulum;
-  @param alpha2 the angular acceleration of the second pendulum.
+  @param omega Array of the angular velocities of the pendulums;
+  @param alpha Array of the angular accelerations of the pendulums.
 *)
 type t = {
-    omega1 : float;
-    omega2: float;
-    alpha1: float;
-    alpha2 : float;
+    omega : float array;
+    alpha : float array;
 }
 
 let add (d1 : t)(d2 : t) = 
+    let n = Array.length d1.omega in
     {
-        omega1 = d1.omega1 +. d2.omega1;
-        omega2 = d1.omega2 +. d2.omega2;
-        alpha1 = d1.alpha1 +. d2.alpha1;
-        alpha2 = d1.alpha2 +. d2.alpha2;
+        omega = Array.init n (fun i -> d1.omega.(i) +. d2.omega.(i));
+        alpha = Array.init n (fun i -> d1.alpha.(i) +. d2.alpha.(i));
     }
 
 let scale (c : float)(d : t) =
+    let n = Array.length d.omega in
     {
-        omega1 = d.omega1 *. c;
-        omega2 = d.omega2 *. c;
-        alpha1 = d.alpha1 *. c;
-        alpha2 = d.alpha2 *. c;
+        omega = Array.init n (fun i -> c *. d.omega.(i));
+        alpha = Array.init n (fun i -> c *. d.alpha.(i));
     }

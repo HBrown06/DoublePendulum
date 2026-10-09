@@ -1,17 +1,25 @@
 (**
-  Physical parameters for the double pendulum system.
+    Physical parameters for the double pendulum system.
 
-  @param m1 the mass of the upper pendulum;
-  @param l1 the length of the upper pendulum;
-  @param m2 the mass of the lower pendulum;
-  @param l2 the length of the lower pendulum;
-  @param g the strength of acceleration due to gravity.
+    @param masses the masses of the pendulums;
+    @param lengths the lengths of the pendulums;
+    @param g the strength of acceleration due to gravity.
 *)
 
 type t = {
-    m1 : float;
-    m2 : float;
-    l1 : float;
-    l2 : float;
+    masses : float array;
+    lengths : float array;
+    tail_masses : float array;
     g : float;
 }
+
+let create masses lengths g = 
+    let n = Array.length masses in
+    let tail_masses = Array.make n 0.0 in
+
+    tail_masses.(n - 1) <- masses.(n - 1);
+    for i = n - 2 downto 0 do
+        tail_masses.(i) <- masses.(i) +. tail_masses.(i + 1)
+    done;
+
+    { masses; lengths; tail_masses; g }

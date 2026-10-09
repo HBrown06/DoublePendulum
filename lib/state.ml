@@ -1,23 +1,23 @@
 (**
   Description of the state space for a double pendulum.
 
-  @param theta1 Angular position of the upper pendulum;
-  @param omega1 Angular velocity of the upper pendulum;
-  @param theta2 Angular position of the lower pendulum;
-  @param omega2 Angular velocity of the lower pendulum.
+  @param theta Array of the angular positions of each pendulum;
+  @param omega Angular velocity of the lower pendulum.
 *)
 
 type t = {
-    theta1 : float;
-    theta2 : float;
-    omega1 : float;
-    omega2 : float;
+    theta : float array;
+    omega : float array;
 }
 
-let add_scaled_derivative (state : t)(h : float)(deriv : Derivative.t): t =
-{
-    theta1 = state.theta1 +. h *. deriv.omega1;
-    theta2 = state.theta2 +. h *. deriv.omega2;
-    omega1 = state.omega1 +. h *. deriv.alpha1;
-    omega2 = state.omega2 +. h *. deriv.alpha2;
-}
+let add_scaled_derivative (state : t)(h : float)(deriv : Derivative.t) : t =
+    let n = Array.length state.theta in
+    if Array.length state.omega <> n
+     || Array.length deriv.omega <> n
+     || Array.length deriv.alpha <> n
+    then invalid_arg "State.add_scaled_derivative: dimension mismatch";
+
+    {
+        theta = Array.init n (fun i -> state.theta.(i) +. h *. deriv.omega.(i));
+        omega = Array.init n (fun i -> state.omega.(i) +. h *. deriv.alpha.(i));
+    }
