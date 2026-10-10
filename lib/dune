@@ -1,2 +1,3 @@
 (library
- (name Double_Pendulum))
+ (name Double_Pendulum)
+ (libraries lacaml))
