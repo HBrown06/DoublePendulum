@@ -40,6 +40,37 @@ let initial_states : State.t list = [
     };
 ]
 
+let energy (params : Parameters.t) (state : State.t) =
+    let n = Array.length state.theta in
+    let kinetic = ref 0.0 in
+
+    for i = 0 to n - 1 do
+        for j = 0 to n - 1 do
+            kinetic :=
+                !kinetic
+                +. 0.5
+                *. params.lengths.(i)
+                *. params.lengths.(j)
+                *. state.omega.(i)
+                *. state.omega.(j)
+                *. cos (state.theta.(i) -. state.theta.(j))
+                *. params.tail_masses.(max i j)
+        done
+    done;
+
+    let potential = ref 0.0 in
+
+    for i = 0 to n - 1 do
+        potential :=
+            !potential
+            +. params.g
+            *. params.lengths.(i)
+            *. (1.0 -. cos state.theta.(i))
+            *. params.tail_masses.(i)
+    done;
+
+    !kinetic +. !potential
+
 let write_header oc n =
     Printf.fprintf oc "run,time";
 
@@ -50,6 +81,8 @@ let write_header oc n =
     for i = 1 to n do
         Printf.fprintf oc ",omega%d" i
     done;
+
+    Printf.fprintf oc ",energy";
 
     Printf.fprintf oc "\n"
 
@@ -64,7 +97,12 @@ let write_state (run_id : int)(state : State.t)(time : float)(out : out_channel)
         (fun omega -> Printf.fprintf out ",%f" omega)
         state.omega;
 
+    let e = energy params state in
+
+    Printf.fprintf out "%f" e;
+
     Printf.fprintf out "\n"
+
 let h = 0.001
 
 let rec simulate (run_id : int)(state : State.t)(time : float)(final_time : float)(time_step : float)(out : out_channel)  = 
