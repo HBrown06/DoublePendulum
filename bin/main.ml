@@ -12,11 +12,36 @@ let g = 9.81
 let params = Parameters.create masses lengths g
 
 let initial_states : State.t list = [
-    
+    {
+        State.theta =
+        Array.init n (fun i ->
+            if i = 0 then Float.pi /. 2.0
+            else 0.0
+        );
+        omega = Array.make n 0.0;
+    };
+
+    {
+        State.theta =
+        Array.init n (fun i ->
+            if i = 0 then Float.pi /. 2.0 +. 0.01
+            else 0.0
+        );
+        omega = Array.make n 0.0;
+    };
+
+    {
+        State.theta =
+        Array.init n (fun i ->
+            if i = 0 then Float.pi /. 2.0 +. 0.02
+            else 0.0
+        );
+        omega = Array.make n 0.0;
+    };
 ]
 
 let write_header oc n =
-    Printf.fprintf oc "run, time";
+    Printf.fprintf oc "run,time";
 
     for i = 1 to n do
         Printf.fprintf oc ",theta%d" i

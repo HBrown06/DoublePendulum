@@ -3,60 +3,84 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
-df = pd.read_csv("data/simulation.csv", header = None, names = ["run", "time", "theta1", "theta2", "omega1", "omega2", "energy"])
+# Load simulation data
+df = pd.read_csv("data/simulation.csv")
+
+# Detect theta columns automatically
+theta_cols = [col for col in df.columns if col.startswith("theta")]
+n = len(theta_cols)
+lengths = np.ones(n)
+
+# Split data by run
 runs = [
     group.reset_index(drop=True)
     for _, group in df.groupby("run")
 ]
 
-L1 = 1.0
-L2 = 1.0
-plt.style.use('dark_background')
-fig, ax = plt.subplots()
+# Simulation timestep
+dt = runs[0]["time"].iloc[1] - runs[0]["time"].iloc[0]
 
-ax.set_aspect("equal")
-ax.set_xlim(-L1 - L2, L1 + L2)
-ax.set_ylim(-L1 - L2, L1 + L2)
-ax.invert_yaxis()
-ax.axis('off')
-
-pendulums = []
-
-for run in runs:
-    rod, = ax.plot([], [], "-", linewidth = 2)
-    pendulums.append(rod)
-
-def update(frame):
-    artists = []
-
-    for run, rod in zip(runs, pendulums):
-        theta1 = run["theta1"].iloc[frame]
-        theta2 = run["theta2"].iloc[frame]
-        x1 = L1 * np.sin(theta1)
-        y1 = L1 * np.cos(theta1)
-        x2 = x1 + L2 * np.sin(theta2)
-        y2 = y1 + L2 * np.cos(theta2)
-
-        rod.set_data(
-            [0, x1, x2],
-            [0, y1, y2]
-        )
-
-        artists.append(rod)
-    return artists
-
-
-dt = df["time"].iloc[1] - df["time"].iloc[0]
+# Animation framerate
 target_fps = 60
+
+# Skip simulation steps so animation runs at approximately target_fps
 stride = max(1, round(1.0 / (target_fps * dt)))
 
-animation = FuncAnimation(
+frames = range(0, len(runs[0]), stride)
+
+# Create figure
+fig, ax = plt.subplots()
+
+total_length = np.sum(lengths)
+
+ax.set_xlim(-total_length, total_length)
+ax.set_ylim(-total_length, total_length)
+ax.set_aspect("equal")
+ax.invert_yaxis()
+ax.axis("off")
+ax.set_xlabel("x")
+ax.set_ylabel("y")
+ax.set_title(f"{n}-Pendulum Simulation")
+
+# One line per simulation run
+lines = [
+    ax.plot([], [], linewidth = 2.5)[0]
+    for _ in runs
+]
+
+def init():
+    for line in lines:
+        line.set_data([], [])
+
+    return lines
+
+def update(frame):
+    for line, run in zip(lines, runs):
+
+        # Current angles
+        thetas = run.loc[frame, theta_cols].to_numpy(dtype=float)
+
+        # Positions of pivot + all masses
+        x = np.zeros(n + 1)
+        y = np.zeros(n + 1)
+
+        # Build linkage positions recursively
+        for i in range(n):
+            x[i + 1] = x[i] + lengths[i] * np.sin(thetas[i])
+            y[i + 1] = y[i] + lengths[i] * np.cos(thetas[i])
+
+        line.set_data(x, y)
+
+    return lines
+
+ani = FuncAnimation(
     fig,
     update,
-    frames = range(0, len(runs[0]), stride),
-    interval = 1000 / target_fps,
-    blit = False
+    frames=frames,
+    init_func=init,
+    interval=800 / target_fps,
+    blit=True,
+    repeat=True
 )
 
-update(0)
 plt.show()
