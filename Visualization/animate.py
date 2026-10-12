@@ -42,44 +42,105 @@ ax.set_xlabel("x")
 ax.set_ylabel("y")
 ax.set_title(f"{n}-Pendulum Simulation")
 
-# One line per simulation run
-lines = [
-    ax.plot([], [], linewidth = 2.5)[0]
-    for _ in runs
-]
+difference_text = plt.text(
+    0,
+    -total_length,
+    "",
+    ha="center",
+    va="top"
+)
+
+trail_length = 300
+lines = []
+trail_lines = []
+
+for _ in runs:
+    line = ax.plot([], [], linewidth=2.5)[0]
+    color = line.get_color()
+    trail = ax.plot([], [], linewidth=1.0, alpha=0.5, color=color)[0]
+
+    lines.append(line)
+    trail_lines.append(trail)
+
+trails_x = [[] for _ in runs]
+trails_y = [[] for _ in runs]
+
+def angle_difference(a, b):
+    return np.abs((a - b + np.pi) % (2 * np.pi) - np.pi)
+
+def get_max_angle_difference(frame):
+    if len(runs) < 2:
+        return 0.0
+
+    theta_values = [
+        run.loc[frame, theta_cols].to_numpy(dtype=float)
+        for run in runs
+    ]
+
+    max_difference = 0.0
+
+    for i in range(len(theta_values)):
+        for j in range(i + 1, len(theta_values)):
+            differences = angle_difference(
+                theta_values[i],
+                theta_values[j]
+            )
+
+            max_difference = max(
+                max_difference,
+                np.max(differences)
+            )
+
+    return max_difference
 
 def init():
     for line in lines:
         line.set_data([], [])
 
-    return lines
+    for trail in trail_lines:
+        trail.set_data([], [])
+
+    difference_text.set_text("")
+
+    return lines + trail_lines + [difference_text]
 
 def update(frame):
-    for line, run in zip(lines, runs):
+    max_difference = get_max_angle_difference(frame)
 
-        # Current angles
+    difference_text.set_text(
+        f"Max Difference: {max_difference:.3f} rad"
+    )
+
+    for j, (line, trail, run) in enumerate(zip(lines, trail_lines, runs)):
         thetas = run.loc[frame, theta_cols].to_numpy(dtype=float)
 
-        # Positions of pivot + all masses
         x = np.zeros(n + 1)
         y = np.zeros(n + 1)
 
-        # Build linkage positions recursively
         for i in range(n):
             x[i + 1] = x[i] + lengths[i] * np.sin(thetas[i])
             y[i + 1] = y[i] + lengths[i] * np.cos(thetas[i])
 
         line.set_data(x, y)
 
-    return lines
+        trails_x[j].append(x[-1])
+        trails_y[j].append(y[-1])
+
+        if len(trails_x[j]) > trail_length:
+            trails_x[j].pop(0)
+            trails_y[j].pop(0)
+
+        trail.set_data(trails_x[j], trails_y[j])
+
+    return lines + trail_lines + [difference_text]
 
 ani = FuncAnimation(
     fig,
     update,
     frames=frames,
     init_func=init,
-    interval=800 / target_fps,
-    blit=True,
+    interval= 1000 / target_fps,
+    blit=False,
     repeat=True
 )
 
